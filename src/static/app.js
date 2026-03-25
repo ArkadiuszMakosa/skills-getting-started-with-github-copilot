@@ -3,14 +3,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  let messageTimeoutId = null;
 
   function showMessage(text, type) {
+    // Clear any existing hide timeout so older calls don't hide a newer message
+    if (messageTimeoutId !== null) {
+      clearTimeout(messageTimeoutId);
+      messageTimeoutId = null;
+    }
+
     messageDiv.textContent = text;
     messageDiv.className = type;
     messageDiv.classList.remove("hidden");
 
-    setTimeout(() => {
+    messageTimeoutId = setTimeout(() => {
       messageDiv.classList.add("hidden");
+      messageTimeoutId = null;
     }, 5000);
   }
 
