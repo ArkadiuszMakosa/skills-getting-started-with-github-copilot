@@ -30,36 +30,73 @@ document.addEventListener("DOMContentLoaded", () => {
         activityCard.className = "activity-card";
 
         const spotsLeft = details.max_participants - details.participants.length;
-        const participantsList = details.participants
-          .map(
-            (participant) => `
-              <li class="participant-item">
-                <span class="participant-email">${participant}</span>
-                <button
-                  class="participant-remove"
-                  type="button"
-                  aria-label="Unregister ${participant} from ${name}"
-                  data-activity="${name}"
-                  data-email="${participant}"
-                >x</button>
-              </li>
-            `
-          )
-          .join("");
 
-        activityCard.innerHTML = `
-          <h4>${name}</h4>
-          <p>${details.description}</p>
-          <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
-          <div class="participants-section">
-            <h5>Participants</h5>
-            <ul class="participants-list">
-              ${participantsList}
-            </ul>
-          </div>
-        `;
+        // Build activity card content safely without using innerHTML with untrusted data
+        const titleEl = document.createElement("h4");
+        titleEl.textContent = name;
 
+        const descriptionEl = document.createElement("p");
+        descriptionEl.textContent = details.description;
+
+        const scheduleEl = document.createElement("p");
+        const scheduleStrong = document.createElement("strong");
+        scheduleStrong.textContent = "Schedule:";
+        scheduleEl.appendChild(scheduleStrong);
+        scheduleEl.appendChild(document.createTextNode(" " + details.schedule));
+
+        const availabilityEl = document.createElement("p");
+        const availabilityStrong = document.createElement("strong");
+        availabilityStrong.textContent = "Availability:";
+        availabilityEl.appendChild(availabilityStrong);
+        availabilityEl.appendChild(
+          document.createTextNode(" " + spotsLeft + " spots left")
+        );
+
+        const participantsSectionEl = document.createElement("div");
+        participantsSectionEl.className = "participants-section";
+
+        const participantsHeaderEl = document.createElement("h5");
+        participantsHeaderEl.textContent = "Participants";
+
+        const participantsListEl = document.createElement("ul");
+        participantsListEl.className = "participants-list";
+
+        details.participants.forEach((participant) => {
+          const li = document.createElement("li");
+          li.className = "participant-item";
+
+          const span = document.createElement("span");
+          span.className = "participant-email";
+          span.textContent = participant;
+
+          const button = document.createElement("button");
+          button.className = "participant-remove";
+          button.type = "button";
+          button.setAttribute(
+            "aria-label",
+            `Unregister ${participant} from ${name}`
+          );
+          button.setAttribute("data-activity", name);
+          button.setAttribute("data-email", participant);
+          button.textContent = "x";
+
+          li.appendChild(span);
+          li.appendChild(button);
+          participantsListEl.appendChild(li);
+        });
+
+        participantsSectionEl.appendChild(participantsHeaderEl);
+        participantsSectionEl.appendChild(participantsListEl);
+
+        // Clear any existing content and append the newly created elements
+        while (activityCard.firstChild) {
+          activityCard.removeChild(activityCard.firstChild);
+        }
+        activityCard.appendChild(titleEl);
+        activityCard.appendChild(descriptionEl);
+        activityCard.appendChild(scheduleEl);
+        activityCard.appendChild(availabilityEl);
+        activityCard.appendChild(participantsSectionEl);
         activitiesList.appendChild(activityCard);
 
         // Add option to select dropdown
